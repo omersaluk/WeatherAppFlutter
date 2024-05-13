@@ -1,4 +1,9 @@
+import 'dart:ui';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 import 'package:weather/weather.dart';
 import 'package:weather_app_flutter/consts.dart';
@@ -27,6 +32,15 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarBrightness: Brightness.dark,
+        ),
+      ),
       body: _buildUI(),
     );
   }
@@ -37,33 +51,95 @@ class _HomePageState extends State<HomePage> {
         child: CircularProgressIndicator(),
       );
     }
-
-    return SizedBox(
-      width: MediaQuery.sizeOf(context).width,
-      height: MediaQuery.sizeOf(context).height,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          _locationHeader(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.08,
-          ),
-          _dateTimeInfo(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.05,
-          ),
-          _weatherIcon(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.02,
-          ),
-          _currentTemp(),
-          SizedBox(
-            height: MediaQuery.sizeOf(context).height * 0.02,
-          ),
-          _extraInfo(),
-        ],
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(40, 0.5 * kToolbarHeight, 40, 10),
+      child: SizedBox(
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: [
+            Align(
+              alignment: AlignmentDirectional(3, -0.3),
+              child: Container(
+                height: 300,
+                width: 300,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle, color: Colors.deepPurple),
+              ),
+            ),
+            Align(
+              alignment: AlignmentDirectional(-3, -0.3),
+              child: Container(
+                height: 300,
+                width: 300,
+                decoration: BoxDecoration(
+                    shape: BoxShape.circle, color: Colors.deepPurple),
+              ),
+            ),
+            Align(
+              alignment: AlignmentDirectional(0, -1.2),
+              child: Container(
+                height: 200,
+                width: 600,
+                decoration: BoxDecoration(color: Colors.orange),
+              ),
+            ),
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 100.0, sigmaY: 100.0),
+              child: Container(
+                decoration: BoxDecoration(color: Colors.transparent),
+              ),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _locationHeader(),
+                  Text(
+                    'Good Morning',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  Center(
+                    child: Image.asset(
+                      'assets/6.png',
+                      scale: 2,
+                    ),
+                  ),
+                  Center(
+                    child: _currentTemp(),
+                  ),
+                  Center(
+                    child: _waetherStuation(),
+                  ),
+                  const SizedBox(
+                    height: 5,
+                  ),
+                  Center(
+                    child: _dateTimeInfo(),
+                  ),
+                  SizedBox(height: 30),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          _extraInfo(),
+                        ],
+                      )
+                    ],
+                  )
+                ],
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -73,7 +149,8 @@ class _HomePageState extends State<HomePage> {
       _weather?.areaName ?? "",
       style: TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.w500,
+        color: Colors.white,
+        fontWeight: FontWeight.w300,
       ),
     );
   }
@@ -84,10 +161,11 @@ class _HomePageState extends State<HomePage> {
       children: [
         Text(
           DateFormat("h:mm a").format(now),
-          style: TextStyle(fontSize: 20),
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.w300, color: Colors.white),
         ),
         SizedBox(
-          height: 10,
+          height: 5,
         ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -96,11 +174,13 @@ class _HomePageState extends State<HomePage> {
           children: [
             Text(
               DateFormat("EEEE").format(now),
-              style: TextStyle(fontWeight: FontWeight.w700),
+              style:
+                  TextStyle(fontWeight: FontWeight.w300, color: Colors.white),
             ),
             Text(
               "  ${DateFormat("d.m.y").format(now)}",
-              style: TextStyle(fontWeight: FontWeight.w400),
+              style:
+                  TextStyle(fontWeight: FontWeight.w300, color: Colors.white),
             ),
           ],
         )
@@ -135,58 +215,162 @@ class _HomePageState extends State<HomePage> {
   Widget _currentTemp() {
     return Text(
       "${_weather?.temperature?.celsius?.toStringAsFixed(0)}° C",
-      style: TextStyle(color: Colors.black, fontSize: 30),
+      style: const TextStyle(
+          color: Colors.white, fontSize: 50, fontWeight: FontWeight.w600),
+    );
+  }
+
+  Widget _waetherStuation() {
+    return const Center(
+      child: Text(
+        'THUNDERSTORM',
+        style: TextStyle(
+            color: Colors.white, fontSize: 25, fontWeight: FontWeight.w500),
+      ),
     );
   }
 
   Widget _extraInfo() {
-    return Container(
-      height: MediaQuery.sizeOf(context).height * 0.15,
-      width: MediaQuery.sizeOf(context).width * 0.80,
-      decoration: BoxDecoration(
-        color: Theme.of(context).highlightColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      padding: const EdgeInsets.all(
-        8,
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Max: ${_weather?.tempMax?.celsius?.toStringAsFixed(0)}° C",
-                style: const TextStyle(color: Colors.black, fontSize: 15),
-              ),
-              Text(
-                "Min: ${_weather?.tempMin?.celsius?.toStringAsFixed(0)}° C",
-                style: const TextStyle(color: Colors.black, fontSize: 15),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            mainAxisSize: MainAxisSize.max,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "Wind: ${_weather?.windSpeed?.toStringAsFixed(0)}m/s",
-                style: const TextStyle(color: Colors.black, fontSize: 15),
-              ),
-              Text(
-                "Humidity: ${_weather?.humidity?.toStringAsFixed(0)}%",
-                style: const TextStyle(color: Colors.black, fontSize: 15),
-              ),
-            ],
-          )
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/13.png',
+                  scale: 16,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Max Temprature",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      "${_weather?.tempMax?.celsius?.toStringAsFixed(0)}° C",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                    )
+                  ],
+                )
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(8)),
+            Row(
+              children: [
+                Image.asset(
+                  'assets/14.png',
+                  scale: 16,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Min Temprature",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      "${_weather?.tempMin?.celsius?.toStringAsFixed(0)}° C",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                    )
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Image.asset(
+                  'assets/9.png',
+                  scale: 16,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Wind Speed",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      "${_weather?.windSpeed?.toStringAsFixed(0)}m/s",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                    )
+                  ],
+                )
+              ],
+            ),
+            Padding(padding: EdgeInsets.all(25)),
+            Row(
+              children: [
+                Image.asset(
+                  'assets/8.png',
+                  scale: 16,
+                ),
+                const SizedBox(
+                  width: 5,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "Humidty",
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w300),
+                    ),
+                    SizedBox(
+                      height: 3,
+                    ),
+                    Text(
+                      "${_weather?.humidity?.toStringAsFixed(0)}%",
+                      style: TextStyle(
+                          color: Colors.white, fontWeight: FontWeight.w700),
+                    )
+                  ],
+                )
+              ],
+            ),
+          ],
+        )
+      ],
     );
   }
 }
